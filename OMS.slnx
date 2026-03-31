@@ -1,5 +1,9 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="ApiGateway/ApiGateway.csproj" />
+  <Project Path="AuthService/AuthService.csproj" />
   <Project Path="OrderService/OrderService.csproj" />
   <Project Path="ProductService/ProductService.csproj" />
 </Solution>
