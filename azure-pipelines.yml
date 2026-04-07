@@ -1,0 +1,87 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  acrName: 'omsregistrynikhil'
+  dockerRegistry: 'omsregistrynikhil.azurecr.io'
+  tag: '$(Build.BuildId)'
+
+stages:
+
+# ─── Stage 1: Build & Test ───────────────────────────────
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: BuildJob
+    displayName: 'Restore and Build'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET 10'
+      inputs:
+        packageType: 'sdk'
+        version: '10.x'
+
+    - script: dotnet restore OMS.slnx
+      displayName: 'Restore packages'
+
+    - script: dotnet build OMS.slnx --no-restore --configuration Release
+      displayName: 'Build solution'
+
+# ─── Stage 2: Docker Build & Push ────────────────────────
+- stage: Docker
+  displayName: 'Build and Push Docker Images'
+  dependsOn: Build
+  jobs:
+  - job: DockerJob
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: Docker@2
+      displayName: 'Build and push ProductService'
+      inputs:
+        command: 'buildAndPush'
+        repository: 'productservice'
+        dockerfile: 'ProductService/Dockerfile'
+        containerRegistry: 'ACRServiceConnection'
+        tags: |
+          $(tag)
+          latest
+
+    - task: Docker@2
+      displayName: 'Build and push OrderService'
+      inputs:
+        command: 'buildAndPush'
+        repository: 'orderservice'
+        dockerfile: 'OrderService/Dockerfile'
+        containerRegistry: 'ACRServiceConnection'
+        tags: |
+          $(tag)
+          latest
+
+    - task: Docker@2
+      displayName: 'Build and push AuthService'
+      inputs:
+        command: 'buildAndPush'
+        repository: 'authservice'
+        dockerfile: 'AuthService/Dockerfile'
+        containerRegistry: 'ACRServiceConnection'
+        tags: |
+          $(tag)
+          latest
+
+    - task: Docker@2
+      displayName: 'Build and push ApiGateway'
+      inputs:
+        command: 'buildAndPush'
+        repository: 'apigateway'
+        dockerfile: 'ApiGateway/Dockerfile'
+        containerRegistry: 'ACRServiceConnection'
+        tags: |
+          $(tag)
+          latest
