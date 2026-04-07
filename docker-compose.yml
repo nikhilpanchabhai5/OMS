@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Nikhil@1234"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+
+  productservice:
+    build:
+      context: ./ProductService
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=ProductDB;User Id=sa;Password=Nikhil@1234;TrustServerCertificate=True;Encrypt=False"
+      ServiceBus__ConnectionString: "${SERVICE_BUS_CONNECTION}"
+      ServiceBus__QueueName: "order-placed"
+    ports:
+      - "7190:8080"
+    depends_on:
+      - sqlserver
+
+  orderservice:
+    build:
+      context: ./OrderService
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=OrderDB;User Id=sa;Password=Nikhil@1234;TrustServerCertificate=True;Encrypt=False"
+      ServiceBus__ConnectionString: "${SERVICE_BUS_CONNECTION}"
+      ServiceBus__QueueName: "order-placed"
+      ProductServiceUrl: "http://productservice:8080"
+    ports:
+      - "7220:8080"
+    depends_on:
+      - sqlserver
+      - productservice
+
+  authservice:
+    build:
+      context: ./AuthService
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=AuthDB;User Id=sa;Password=Nikhil@1234;TrustServerCertificate=True;Encrypt=False"
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "OMS"
+      Jwt__Audience: "OMS"
+    ports:
+      - "7100:8080"
+    depends_on:
+      - sqlserver
+
+  apigateway:
+    build:
+      context: ./ApiGateway
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "OMS"
+      Jwt__Audience: "OMS"
+    ports:
+      - "5000:8080"
+    depends_on:
+      - productservice
+      - orderservice
+      - authservice
+
+volumes:
+  sqlserver-data:

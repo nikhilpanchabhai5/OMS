@@ -33,10 +33,30 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//    db.Database.EnsureCreated();
+//}
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    var retries = 10;
+    while (retries > 0)
+    {
+        try
+        {
+            db.Database.EnsureCreated();
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            Console.WriteLine($"DB not ready, retrying... ({retries} left). {ex.Message}");
+            Thread.Sleep(3000);
+        }
+    }
 }
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
