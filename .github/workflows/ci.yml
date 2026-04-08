@@ -1,0 +1,81 @@
+name: OMS CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  ACR_NAME: omsregistrynikhil
+  DOCKER_REGISTRY: omsregistrynikhil.azurecr.io
+  TAG: ${{ github.run_number }}
+
+jobs:
+
+# ─── Job 1: Build & Test ───────────────────────────────
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore packages
+      run: dotnet restore OMS.slnx
+
+    - name: Build solution
+      run: dotnet build OMS.slnx --no-restore --configuration Release
+
+# ─── Job 2: Docker Build & Push ────────────────────────
+  docker:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    # ProductService
+    - name: Build & Push ProductService
+      run: |
+        docker build -t $DOCKER_REGISTRY/productservice:${TAG} -f ProductService/Dockerfile .
+        docker push $DOCKER_REGISTRY/productservice:${TAG}
+        docker tag $DOCKER_REGISTRY/productservice:${TAG} $DOCKER_REGISTRY/productservice:latest
+        docker push $DOCKER_REGISTRY/productservice:latest
+
+    # OrderService
+    - name: Build & Push OrderService
+      run: |
+        docker build -t $DOCKER_REGISTRY/orderservice:${TAG} -f OrderService/Dockerfile .
+        docker push $DOCKER_REGISTRY/orderservice:${TAG}
+        docker tag $DOCKER_REGISTRY/orderservice:${TAG} $DOCKER_REGISTRY/orderservice:latest
+        docker push $DOCKER_REGISTRY/orderservice:latest
+
+    # AuthService
+    - name: Build & Push AuthService
+      run: |
+        docker build -t $DOCKER_REGISTRY/authservice:${TAG} -f AuthService/Dockerfile .
+        docker push $DOCKER_REGISTRY/authservice:${TAG}
+        docker tag $DOCKER_REGISTRY/authservice:${TAG} $DOCKER_REGISTRY/authservice:latest
+        docker push $DOCKER_REGISTRY/authservice:latest
+
+    # ApiGateway
+    - name: Build & Push ApiGateway
+      run: |
+        docker build -t $DOCKER_REGISTRY/apigateway:${TAG} -f ApiGateway/Dockerfile .
+        docker push $DOCKER_REGISTRY/apigateway:${TAG}
+        docker tag $DOCKER_REGISTRY/apigateway:${TAG} $DOCKER_REGISTRY/apigateway:latest
+        docker push $DOCKER_REGISTRY/apigateway:latest
