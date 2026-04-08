@@ -49,10 +49,10 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
-    # ProductService
+     # ProductService
     - name: Build & Push ProductService
       run: |
-        docker build -t $DOCKER_REGISTRY/productservice:${TAG} -f ProductService/Dockerfile .
+        docker build -t $DOCKER_REGISTRY/productservice:${TAG} -f ProductService/Dockerfile ./ProductService
         docker push $DOCKER_REGISTRY/productservice:${TAG}
         docker tag $DOCKER_REGISTRY/productservice:${TAG} $DOCKER_REGISTRY/productservice:latest
         docker push $DOCKER_REGISTRY/productservice:latest
@@ -60,7 +60,7 @@ jobs:
     # OrderService
     - name: Build & Push OrderService
       run: |
-        docker build -t $DOCKER_REGISTRY/orderservice:${TAG} -f OrderService/Dockerfile .
+        docker build -t $DOCKER_REGISTRY/orderservice:${TAG} -f OrderService/Dockerfile ./OrderService
         docker push $DOCKER_REGISTRY/orderservice:${TAG}
         docker tag $DOCKER_REGISTRY/orderservice:${TAG} $DOCKER_REGISTRY/orderservice:latest
         docker push $DOCKER_REGISTRY/orderservice:latest
@@ -68,7 +68,7 @@ jobs:
     # AuthService
     - name: Build & Push AuthService
       run: |
-        docker build -t $DOCKER_REGISTRY/authservice:${TAG} -f AuthService/Dockerfile .
+        docker build -t $DOCKER_REGISTRY/authservice:${TAG} -f AuthService/Dockerfile ./AuthService
         docker push $DOCKER_REGISTRY/authservice:${TAG}
         docker tag $DOCKER_REGISTRY/authservice:${TAG} $DOCKER_REGISTRY/authservice:latest
         docker push $DOCKER_REGISTRY/authservice:latest
@@ -76,7 +76,7 @@ jobs:
     # ApiGateway
     - name: Build & Push ApiGateway
       run: |
-        docker build -t $DOCKER_REGISTRY/apigateway:${TAG} -f ApiGateway/Dockerfile .
+        docker build -t $DOCKER_REGISTRY/apigateway:${TAG} -f ApiGateway/Dockerfile ./ApiGateway
         docker push $DOCKER_REGISTRY/apigateway:${TAG}
         docker tag $DOCKER_REGISTRY/apigateway:${TAG} $DOCKER_REGISTRY/apigateway:latest
         docker push $DOCKER_REGISTRY/apigateway:latest
