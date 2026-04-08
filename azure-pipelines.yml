@@ -17,7 +17,7 @@ stages:
   - job: BuildJob
     displayName: 'Restore and Build'
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'Default' 
 
     steps:
     - task: UseDotNet@2
@@ -39,7 +39,7 @@ stages:
   jobs:
   - job: DockerJob
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'Default' 
 
     steps:
     - task: Docker@2
