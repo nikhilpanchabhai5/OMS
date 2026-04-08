@@ -1,17 +1,20 @@
-markdown# Order Management System (OMS) — Microservices
+# Order Management System (OMS) — Microservices
 
 A production-ready microservices-based Order Management System built with .NET 10, demonstrating real-world architecture patterns used in enterprise applications.
 
 ## Architecture
+
+```
 Client
-↓
+  ↓
 API Gateway (YARP) — JWT Authentication
-↓              ↓              ↓
+  ↓              ↓              ↓
 ProductService  OrderService  AuthService
-↓                ↓
+  ↓                ↓
 ProductDB        OrderDB        AuthDB
-↓        ↓
-Azure Service Bus
+       ↓        ↓
+    Azure Service Bus
+```
 
 ## Services
 
@@ -54,17 +57,18 @@ Azure Service Bus
 ## CI/CD Pipeline
 
 Azure DevOps pipeline runs automatically on every push to `main`:
+
+```
 Push to main
-↓
+     ↓
 Stage 1: Build & Test
-
-Restore packages
-Build all services
-↓
+  - Restore packages
+  - Build all services
+     ↓
 Stage 2: Docker Build & Push
-Build Docker images for all 4 services
-Push to Azure Container Registry
-
+  - Build Docker images for all 4 services
+  - Push to Azure Container Registry
+```
 
 ## Local Setup
 
