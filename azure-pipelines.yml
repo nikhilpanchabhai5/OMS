@@ -17,7 +17,7 @@ stages:
   - job: BuildJob
     displayName: 'Restore and Build'
     pool:
-      name: 'Default' 
+      name: 'Default'
 
     steps:
     - task: UseDotNet@2
@@ -39,7 +39,7 @@ stages:
   jobs:
   - job: DockerJob
     pool:
-      name: 'Default' 
+      name: 'Default'
 
     steps:
     - task: Docker@2
@@ -85,8 +85,8 @@ stages:
         tags: |
           $(tag)
           latest
-      - powershell: |
+
+    - powershell: |
         Start-Sleep -Seconds 5
-        $configPath = "$(Agent.TempDirectory)\DockerConfig*"
-        Remove-Item $configPath -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item "$(Agent.TempDirectory)\DockerConfig*" -Recurse -Force -ErrorAction SilentlyContinue
       displayName: 'Cleanup Docker config'
