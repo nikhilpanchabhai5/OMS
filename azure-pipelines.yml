@@ -85,3 +85,8 @@ stages:
         tags: |
           $(tag)
           latest
+      - powershell: |
+        Start-Sleep -Seconds 5
+        $configPath = "$(Agent.TempDirectory)\DockerConfig*"
+        Remove-Item $configPath -Recurse -Force -ErrorAction SilentlyContinue
+      displayName: 'Cleanup Docker config'
