@@ -4,7 +4,8 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY ["ProductService.csproj", "."]
+
+COPY ["ProductService/ProductService.csproj, "."]
 RUN dotnet restore
 COPY . .
 RUN dotnet publish -c Release -o /app/publish
